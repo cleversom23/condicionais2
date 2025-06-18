@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caça ao Tesouro - Par ou Ímpar</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .coin-counter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 215, 0, 0.3);
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: 2px solid #FFD700;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .input-section {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 20px;
+            margin: 30px 0;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        input[type="number"] {
+            padding: 15px 20px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            width: 200px;
+            text-align: center;
+            margin: 10px;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 215, 0, 0.3);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            border: 2px solid #FFD700;
+        }
+        
+        button:hover {
+            background: rgba(255, 215, 0, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .result {
+            font-size: 1.5em;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 15px;
+            font-weight: bold;
+        }
+        
+        .par {
+            background: rgba(76, 175, 80, 0.3);
+            border: 2px solid #4CAF50;
+        }
+        
+        .impar {
+            background: rgba(244, 67, 54, 0.3);
+            border: 2px solid #F44336;
+        }
+        
+        .canvas-container {
+            margin: 30px 0;
+        }
+        
+        .treasure-info {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 15px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 2px solid #FFD700;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-btn">🏠 Voltar</a>
+    <div class="coin-counter">🪙 <span id="moedas">0</span></div>
+    
+    <div class="container">
+        <h1>🗺️ Caça ao Tesouro</h1>
+        <p>Descubra se o número leva a um tesouro (par) ou a uma armadilha (ímpar)!</p>
+        
+        <div class="treasure-info">
+            <p><strong>💡 Dica:</strong> Números pares revelam tesouros dourados, números ímpares revelam armadilhas vermelhas!</p>
+        </div>
+        
+        <div class="input-section">
+            <input type="number" id="numero" placeholder="Digite um número" />
+            <br>
+            <button onclick="verificarNumero()">🔍 Procurar Tesouro</button>
+            <button onclick="limpar()">🗑️ Limpar</button>
+        </div>
+        
+        <div id="resultado" class="result" style="display: none;"></div>
+        
+        <div class="canvas-container">
+            <div id="canvas-container"></div>
+        </div>
+    </div>
+
+    <script>
+        let numeroAtual = 0;
+        let resultado = '';
+        let animacao = false;
+        let moedas = 0;
+        let tesouros = [];
+        
+        function setup() {
+            let canvas = createCanvas(400, 200);
+            canvas.parent('canvas-container');
+            background(139, 69, 19, 0.1);
+        }
+        
+        function draw() {
+            if (animacao) {
+                background(139, 69, 19, 0.1);
+                
+                if (resultado === 'par') {
+                    // Tesouros dourados para números pares
+                    for (let i = 0; i < numeroAtual && i < 20; i++) {
+                        let x = map(i, 0, 19, 50, width - 50);
+                        let y = height / 2 + sin(frameCount * 0.1 + i) * 30;
+                        
+                        // Brilho dourado
+                        fill(255, 215, 0, 100);
+                        ellipse(x, y, 30, 30);
+                        
+                        fill(255, 215, 0, 200);
+                        ellipse(x, y, 20, 20);
+                        
+                        // Símbolo de tesouro
+                        fill(255);
+                        textAlign(CENTER, CENTER);
+                        textSize(12);
+                        text('💎', x, y);
+                    }
+                } else if (resultado === 'impar') {
+                    // Armadilhas vermelhas para números ímpares
+                    for (let i = 0; i < numeroAtual && i < 20; i++) {
+                        let x = map(i, 0, 19, 50, width - 50);
+                        let y = height / 2 + cos(frameCount * 0.1 + i) * 30;
+                        
+                        fill(244, 67, 54, 200);
+                        noStroke();
+                        rectMode(CENTER);
+                        rect(x, y, 20, 20);
+                        
+                        // Símbolo de armadilha
+                        fill(255);
+                        textAlign(CENTER, CENTER);
+                        textSize(12);
+                        text('💀', x, y);
+                    }
+                }
+            }
+        }
+        
+        function verificarNumero() {
+            let input = document.getElementById('numero');
+            let numero = parseInt(input.value);
+            
+            if (isNaN(numero)) {
+                alert('Por favor, digite um número válido!');
+                return;
+            }
+            
+            numeroAtual = numero;
+            let resultadoDiv = document.getElementById('resultado');
+            
+            if (numero % 2 === 0) {
+                resultado = 'par';
+                moedas += 5; // Ganha 5 moedas por tesouro
+                resultadoDiv.innerHTML = `🎉 Tesouro encontrado! O número ${numero} é <strong>PAR</strong>! +5 moedas`;
+                resultadoDiv.className = 'result par';
+            } else {
+                resultado = 'impar';
+                resultadoDiv.innerHTML = `💀 Armadilha! O número ${numero} é <strong>ÍMPAR</strong>!`;
+                resultadoDiv.className = 'result impar';
+            }
+            
+            document.getElementById('moedas').textContent = moedas;
+            resultadoDiv.style.display = 'block';
+            animacao = true;
+        }
+        
+        function limpar() {
+            document.getElementById('numero').value = '';
+            document.getElementById('resultado').style.display = 'none';
+            animacao = false;
+            background(139, 69, 19, 0.1);
+        }
+        
+        // Permitir verificação com Enter
+        document.getElementById('numero').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                verificarNumero();
+            }
+        });
+    </script>
+</body>
+</html> 

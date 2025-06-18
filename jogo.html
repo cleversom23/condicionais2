@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arena de Batalha - Par ou Ímpar</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .coin-counter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 215, 0, 0.3);
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: 2px solid #FFD700;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .game-section {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 20px;
+            margin: 30px 0;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(231, 76, 60, 0.3);
+        }
+        
+        .score {
+            font-size: 1.3em;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(231, 76, 60, 0.2);
+            border-radius: 15px;
+            border: 2px solid #E74C3C;
+        }
+        
+        .number-display {
+            font-size: 4em;
+            font-weight: bold;
+            margin: 30px 0;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            background: rgba(231, 76, 60, 0.2);
+            padding: 20px;
+            border-radius: 20px;
+            display: inline-block;
+            min-width: 200px;
+            border: 2px solid #E74C3C;
+        }
+        
+        .choice-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .choice-btn {
+            padding: 20px 40px;
+            font-size: 1.3em;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            min-width: 150px;
+        }
+        
+        .par-btn {
+            background: linear-gradient(45deg, #27AE60, #2ECC71);
+            color: white;
+            border: 2px solid #27AE60;
+        }
+        
+        .impar-btn {
+            background: linear-gradient(45deg, #E74C3C, #C0392B);
+            color: white;
+            border: 2px solid #E74C3C;
+        }
+        
+        .choice-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .choice-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            font-size: 1.5em;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 15px;
+            font-weight: bold;
+        }
+        
+        .correct {
+            background: rgba(39, 174, 96, 0.3);
+            border: 2px solid #27AE60;
+        }
+        
+        .incorrect {
+            background: rgba(231, 76, 60, 0.3);
+            border: 2px solid #E74C3C;
+        }
+        
+        .next-btn {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 215, 0, 0.3);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px;
+            border: 2px solid #FFD700;
+        }
+        
+        .next-btn:hover {
+            background: rgba(255, 215, 0, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .canvas-container {
+            margin: 30px 0;
+        }
+        
+        .arena-info {
+            background: rgba(231, 76, 60, 0.2);
+            padding: 15px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 2px solid #E74C3C;
+        }
+        
+        /* Modal de vídeo */
+        .video-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.7);
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .video-modal.active {
+            display: flex;
+        }
+        
+        .video-modal-content {
+            background: #222;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 40px #000a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .video-modal video {
+            max-width: 90vw;
+            max-height: 60vh;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .close-video-btn {
+            background: #E74C3C;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        
+        .close-video-btn:hover {
+            background: #C0392B;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-btn">🏠 Voltar</a>
+    <div class="coin-counter">🪙 <span id="moedas">0</span></div>
+    
+    <div class="container">
+        <h1>⚔️ Arena de Batalha</h1>
+        <p>Enfrente o desafio! Escolha sua estratégia: PAR (escudo) ou ÍMPAR (espada)!</p>
+        
+        <div class="arena-info">
+            <p><strong>⚔️ Regras da Arena:</strong> Acertos ganham 10 pontos + 3 moedas! Erros perdem 1 moeda!</p>
+        </div>
+        
+        <div class="score">
+            <span>Pontuação: <span id="pontos">0</span></span> | 
+            <span>Acertos: <span id="acertos">0</span>/<span id="total">0</span></span>
+        </div>
+        
+        <div class="game-section">
+            <div class="number-display" id="numeroDisplay">⚔️</div>
+            
+            <div class="choice-buttons">
+                <button class="choice-btn par-btn" onclick="escolher('par')" id="parBtn">🛡️ PAR (Escudo)</button>
+                <button class="choice-btn impar-btn" onclick="escolher('impar')" id="imparBtn">⚔️ ÍMPAR (Espada)</button>
+            </div>
+            
+            <div id="resultado" class="result" style="display: none;"></div>
+            
+            <button class="next-btn" onclick="proximoNumero()" id="nextBtn" style="display: none;">⚔️ Próximo Desafio</button>
+        </div>
+        
+        <div class="canvas-container">
+            <div id="canvas-container"></div>
+        </div>
+    </div>
+
+    <!-- Modal de vídeo de comemoração -->
+    <div class="video-modal" id="videoModal">
+        <div class="video-modal-content">
+            <video id="parabensVideo" src="https://www.w3schools.com/html/movie.mp4" controls autoplay></video>
+            <button class="close-video-btn" onclick="fecharVideo()">Fechar</button>
+        </div>
+    </div>
+
+    <script>
+        let pontos = 0;
+        let acertos = 0;
+        let total = 0;
+        let numeroAtual = 0;
+        let respostaCorreta = '';
+        let jogoAtivo = false;
+        let animacao = false;
+        let particulas = [];
+        let moedas = 0;
+        
+        function setup() {
+            let canvas = createCanvas(400, 200);
+            canvas.parent('canvas-container');
+            background(44, 62, 80, 0.1);
+        }
+        
+        function draw() {
+            if (animacao) {
+                background(44, 62, 80, 0.1);
+                
+                // Atualizar e desenhar partículas
+                for (let i = particulas.length - 1; i >= 0; i--) {
+                    particulas[i].update();
+                    particulas[i].display();
+                    
+                    if (particulas[i].isDead()) {
+                        particulas.splice(i, 1);
+                    }
+                }
+            }
+        }
+        
+        class Particula {
+            constructor(x, y, cor, tipo) {
+                this.x = x;
+                this.y = y;
+                this.vx = random(-5, 5);
+                this.vy = random(-8, -2);
+                this.life = 255;
+                this.cor = cor;
+                this.tipo = tipo; // 'escudo' ou 'espada'
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += 0.2; // gravidade
+                this.life -= 8;
+            }
+            
+            display() {
+                fill(this.cor[0], this.cor[1], this.cor[2], this.life);
+                noStroke();
+                
+                if (this.tipo === 'escudo') {
+                    ellipse(this.x, this.y, 12, 12);
+                    // Desenhar escudo
+                    fill(255, 255, 255, this.life * 0.5);
+                    ellipse(this.x, this.y, 8, 8);
+                } else {
+                    rectMode(CENTER);
+                    rect(this.x, this.y, 10, 15);
+                    // Desenhar espada
+                    fill(255, 255, 255, this.life * 0.5);
+                    rect(this.x, this.y, 4, 12);
+                }
+            }
+            
+            isDead() {
+                return this.life <= 0;
+            }
+        }
+        
+        function gerarNumero() {
+            numeroAtual = Math.floor(Math.random() * 100) + 1;
+            respostaCorreta = numeroAtual % 2 === 0 ? 'par' : 'impar';
+            document.getElementById('numeroDisplay').textContent = numeroAtual;
+            jogoAtivo = true;
+            
+            // Habilitar botões
+            document.getElementById('parBtn').disabled = false;
+            document.getElementById('imparBtn').disabled = false;
+            document.getElementById('resultado').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+        }
+        
+        function escolher(escolha) {
+            if (!jogoAtivo) return;
+            
+            jogoAtivo = false;
+            total++;
+            
+            // Desabilitar botões
+            document.getElementById('parBtn').disabled = true;
+            document.getElementById('imparBtn').disabled = true;
+            
+            let resultadoDiv = document.getElementById('resultado');
+            let acertou = escolha === respostaCorreta;
+            
+            if (acertou) {
+                pontos += 10;
+                acertos++;
+                moedas += 3; // Ganha 3 moedas por acerto
+                resultadoDiv.innerHTML = `🎉 Vitória! O número ${numeroAtual} é ${respostaCorreta.toUpperCase()}! +10 pontos +3 moedas`;
+                resultadoDiv.className = 'result correct';
+                
+                // Criar partículas de vitória (escudos)
+                animacao = true;
+                for (let i = 0; i < 15; i++) {
+                    particulas.push(new Particula(width/2, height/2, [39, 174, 96], 'escudo'));
+                }
+                // Exibir vídeo de parabéns
+                mostrarVideo();
+            } else {
+                moedas = Math.max(0, moedas - 1); // Perde 1 moeda por erro
+                resultadoDiv.innerHTML = `💥 Derrota! O número ${numeroAtual} é ${respostaCorreta.toUpperCase()}. -1 moeda`;
+                resultadoDiv.className = 'result incorrect';
+                
+                // Criar partículas de derrota (espadas)
+                animacao = true;
+                for (let i = 0; i < 10; i++) {
+                    particulas.push(new Particula(width/2, height/2, [231, 76, 60], 'espada'));
+                }
+            }
+            
+            resultadoDiv.style.display = 'block';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            
+            // Atualizar pontuação e moedas
+            document.getElementById('pontos').textContent = pontos;
+            document.getElementById('acertos').textContent = acertos;
+            document.getElementById('total').textContent = total;
+            document.getElementById('moedas').textContent = moedas;
+        }
+        
+        function proximoNumero() {
+            animacao = false;
+            particulas = [];
+            gerarNumero();
+        }
+        
+        // Modal de vídeo
+        function mostrarVideo() {
+            const modal = document.getElementById('videoModal');
+            const video = document.getElementById('parabensVideo');
+            modal.classList.add('active');
+            video.currentTime = 0;
+            video.play();
+        }
+        
+        function fecharVideo() {
+            const modal = document.getElementById('videoModal');
+            const video = document.getElementById('parabensVideo');
+            modal.classList.remove('active');
+            video.pause();
+        }
+        
+        // Iniciar o jogo
+        window.onload = function() {
+            gerarNumero();
+        };
+    </script>
+</body>
+</html> 

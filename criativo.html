@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galáxia Espacial - Par ou Ímpar</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0B1426 0%, #1A237E 50%, #4A148C 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .coin-counter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 215, 0, 0.3);
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: 2px solid #FFD700;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .controls {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 20px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(138, 43, 226, 0.3);
+        }
+        
+        input[type="number"] {
+            padding: 10px 15px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            width: 150px;
+            text-align: center;
+            margin: 10px;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+        }
+        
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 10px;
+            background: rgba(138, 43, 226, 0.3);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+            border: 2px solid #8A2BE2;
+        }
+        
+        button:hover {
+            background: rgba(138, 43, 226, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .info {
+            font-size: 1.1em;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(138, 43, 226, 0.2);
+            border-radius: 15px;
+            border: 2px solid #8A2BE2;
+        }
+        
+        .canvas-container {
+            margin: 20px 0;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            border-radius: 15px;
+            font-weight: bold;
+        }
+        
+        .legend-par {
+            background: rgba(0, 255, 255, 0.3);
+            border: 2px solid #00FFFF;
+        }
+        
+        .legend-impar {
+            background: rgba(255, 20, 147, 0.3);
+            border: 2px solid #FF1493;
+        }
+        
+        .legend-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+        
+        .dot-par {
+            background: #00FFFF;
+        }
+        
+        .dot-impar {
+            background: #FF1493;
+        }
+        
+        .galaxy-info {
+            background: rgba(138, 43, 226, 0.2);
+            padding: 15px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 2px solid #8A2BE2;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-btn">🏠 Voltar</a>
+    <div class="coin-counter">🪙 <span id="moedas">0</span></div>
+    
+    <div class="container">
+        <h1>🌌 Galáxia Espacial</h1>
+        <p>Explore o universo! Números pares criam planetas azuis, ímpares criam estrelas rosa!</p>
+        
+        <div class="galaxy-info">
+            <p><strong>🚀 Sistema de Recompensas:</strong> Cada número adicionado ganha 2 moedas! Gerar sequência ganha 10 moedas!</p>
+        </div>
+        
+        <div class="controls">
+            <input type="number" id="numero" placeholder="Digite um número" min="1" max="100" />
+            <button onclick="adicionarNumero()">🚀 Adicionar Planeta</button>
+            <button onclick="gerarSequencia()">🌌 Gerar Galáxia</button>
+            <button onclick="limparVisualizacao()">🗑️ Limpar Universo</button>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item legend-par">
+                <div class="legend-dot dot-par"></div>
+                <span>Planetas Azuis (Pares)</span>
+            </div>
+            <div class="legend-item legend-impar">
+                <div class="legend-dot dot-impar"></div>
+                <span>Estrelas Rosa (Ímpares)</span>
+            </div>
+        </div>
+        
+        <div class="info">
+            <p><strong>🌌 Como funciona:</strong> Números pares criam planetas azuis que orbitam suavemente, 
+            enquanto números ímpares criam estrelas rosa que pulsam e brilham. 
+            Cada número adicionado expande sua galáxia pessoal!</p>
+        </div>
+        
+        <div class="canvas-container">
+            <div id="canvas-container"></div>
+        </div>
+    </div>
+
+    <script>
+        let numeros = [];
+        let elementos = [];
+        let tempo = 0;
+        let moedas = 0;
+        let estrelas = [];
+        
+        function setup() {
+            let canvas = createCanvas(800, 400);
+            canvas.parent('canvas-container');
+            background(11, 20, 38, 0.1);
+            
+            // Criar estrelas de fundo
+            for (let i = 0; i < 50; i++) {
+                estrelas.push({
+                    x: random(width),
+                    y: random(height),
+                    brilho: random(100, 255),
+                    velocidade: random(0.5, 2)
+                });
+            }
+        }
+        
+        function draw() {
+            background(11, 20, 38, 0.1);
+            
+            // Desenhar estrelas de fundo
+            for (let estrela of estrelas) {
+                fill(255, 255, 255, estrela.brilho * sin(tempo * estrela.velocidade));
+                noStroke();
+                ellipse(estrela.x, estrela.y, 2, 2);
+            }
+            
+            // Desenhar elementos
+            for (let elemento of elementos) {
+                elemento.update();
+                elemento.display();
+            }
+            
+            tempo += 0.02;
+        }
+        
+        class ElementoVisual {
+            constructor(numero, x, y) {
+                this.numero = numero;
+                this.x = x;
+                this.y = y;
+                this.tamanho = map(numero, 1, 100, 15, 60);
+                this.velocidade = map(numero, 1, 100, 0.3, 1.5);
+                this.angulo = random(TWO_PI);
+                this.rotacao = 0;
+                this.cor = numero % 2 === 0 ? [0, 255, 255] : [255, 20, 147]; // Azul para pares, rosa para ímpares
+                this.tipo = numero % 2 === 0 ? 'planeta' : 'estrela';
+                this.orbita = random(50, 150);
+                this.centroX = width / 2;
+                this.centroY = height / 2;
+            }
+            
+            update() {
+                // Movimento orbital
+                this.x = this.centroX + cos(tempo * this.velocidade + this.angulo) * this.orbita;
+                this.y = this.centroY + sin(tempo * this.velocidade + this.angulo) * this.orbita;
+                
+                this.rotacao += this.velocidade * 0.05;
+                
+                // Manter dentro dos limites
+                if (this.x < 0) this.x = width;
+                if (this.x > width) this.x = 0;
+                if (this.y < 0) this.y = height;
+                if (this.y > height) this.y = 0;
+            }
+            
+            display() {
+                push();
+                translate(this.x, this.y);
+                rotate(this.rotacao);
+                
+                if (this.tipo === 'planeta') {
+                    // Planeta azul com anéis
+                    let brilho = sin(tempo * 2 + this.angulo) * 50 + 200;
+                    fill(this.cor[0], this.cor[1], this.cor[2], brilho);
+                    stroke(0, 255, 255, 100);
+                    strokeWeight(3);
+                    ellipse(0, 0, this.tamanho, this.tamanho);
+                    
+                    // Anéis do planeta
+                    noFill();
+                    stroke(0, 255, 255, 150);
+                    strokeWeight(2);
+                    ellipse(0, 0, this.tamanho * 1.5, this.tamanho * 0.3);
+                    
+                } else {
+                    // Estrela rosa pulsante
+                    let pulsacao = sin(tempo * 4 + this.angulo) * 10 + this.tamanho;
+                    fill(this.cor[0], this.cor[1], this.cor[2], 200);
+                    noStroke();
+                    
+                    // Desenhar estrela de 5 pontas
+                    let raio = pulsacao / 2;
+                    for (let i = 0; i < 5; i++) {
+                        let angulo = (i * TWO_PI) / 5 - PI / 2;
+                        let x1 = cos(angulo) * raio;
+                        let y1 = sin(angulo) * raio;
+                        let x2 = cos(angulo + TWO_PI / 10) * (raio * 0.5);
+                        let y2 = sin(angulo + TWO_PI / 10) * (raio * 0.5);
+                        
+                        triangle(0, 0, x1, y1, x2, y2);
+                    }
+                    
+                    // Brilho central
+                    fill(255, 255, 255, 150);
+                    ellipse(0, 0, raio * 0.3, raio * 0.3);
+                }
+                
+                // Mostrar o número
+                fill(255);
+                noStroke();
+                textAlign(CENTER, CENTER);
+                textSize(map(this.tamanho, 15, 60, 10, 18));
+                text(this.numero, 0, 0);
+                
+                pop();
+            }
+        }
+        
+        function adicionarNumero() {
+            let input = document.getElementById('numero');
+            let numero = parseInt(input.value);
+            
+            if (isNaN(numero) || numero < 1 || numero > 100) {
+                alert('Por favor, digite um número válido entre 1 e 100!');
+                return;
+            }
+            
+            numeros.push(numero);
+            moedas += 2; // Ganha 2 moedas por número adicionado
+            
+            // Criar elemento visual
+            let x = random(50, width - 50);
+            let y = random(50, height - 50);
+            elementos.push(new ElementoVisual(numero, x, y));
+            
+            document.getElementById('moedas').textContent = moedas;
+            input.value = '';
+        }
+        
+        function gerarSequencia() {
+            limparVisualizacao();
+            moedas += 10; // Ganha 10 moedas por gerar sequência
+            
+            // Gerar sequência de números
+            for (let i = 1; i <= 20; i++) {
+                let numero = Math.floor(Math.random() * 100) + 1;
+                numeros.push(numero);
+                
+                let x = random(50, width - 50);
+                let y = random(50, height - 50);
+                elementos.push(new ElementoVisual(numero, x, y));
+            }
+            
+            document.getElementById('moedas').textContent = moedas;
+        }
+        
+        function limparVisualizacao() {
+            numeros = [];
+            elementos = [];
+        }
+        
+        // Permitir adicionar com Enter
+        document.getElementById('numero').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                adicionarNumero();
+            }
+        });
+        
+        // Gerar alguns números iniciais
+        window.onload = function() {
+            setTimeout(() => {
+                for (let i = 0; i < 5; i++) {
+                    let numero = Math.floor(Math.random() * 100) + 1;
+                    numeros.push(numero);
+                    moedas += 2;
+                    
+                    let x = random(50, width - 50);
+                    let y = random(50, height - 50);
+                    elementos.push(new ElementoVisual(numero, x, y));
+                }
+                document.getElementById('moedas').textContent = moedas;
+            }, 1000);
+        };
+    </script>
+</body>
+</html> 
